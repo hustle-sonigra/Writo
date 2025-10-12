@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -6,8 +7,10 @@ const postModel = require("./UserModel/post");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
+const PORT = process.env.PORT || 3000;
 
 app.set("view engine","ejs");
+app.set("views", path.join(__dirname, "views"));
 
 app.use(cookieParser());
 app.use(express.json());
@@ -22,31 +25,37 @@ app.get("/index",(req,res)=>{
     res.render("index");
 });
 
-app.post("/create", (req,res)=>{
-    bcrypt.genSalt(10, function(err, salt) {
-    bcrypt.hash(req.body.password, salt, async function(err, hash) {
-        let user = await userModel.create({
-        name:req.body.name,
-        age:req.body.age,
-        email:req.body.email,
-        password:hash
-});
-});
-});
-let token = jwt.sign
-(
-    {email:req.body.email},"secret"
-);
+app.post("/create", async (req, res) => {
+  try {
+    // Hash password securely
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(req.body.password, salt);
 
-res.cookie("token",token);
-return renderFeed(req,res);
+    // Create new user
+    const user = await userModel.create({
+      name: req.body.name,
+      age: req.body.age,
+      email: req.body.email,
+      password: hash,
+    });
 
-// here we have a issue that the pass is visible on the read page. 
-// We want it to be not visible thus pass ka hash banaega and then we will save 
-// that to uur system.Kyuki if we are keeping the data readable passwords
-//  ka toh koi sense hi nhii bachega.
-// abb now we have to access all the post ka data here 
+    // Generate JWT
+    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET);
+
+    // Set cookie
+    res.cookie("token", token);
+
+    // Redirect or render feed page
+    res.redirect("/feed");
+    // OR if you have your own function:
+    // return renderFeed(req, res);
+
+  } catch (err) {
+    console.error("Error creating user:", err);
+    res.status(500).render("wrong"); // or res.send("Something went wrong");
+  }
 });
+
 
 app.get("/logout",(req,res)=>{
 res.cookie("token","");
@@ -67,7 +76,7 @@ app.post("/login", async (req, res) => {
     bcrypt.compare(req.body.password, user.password, function(err, result) {
         if (result) {
             // Only issue token after successful login
-            let token = jwt.sign({ email: user.email }, "secret",{ noTimestamp: true });
+            let token = jwt.sign({ email: user.email }, process.env.JWT_SECRET,{ noTimestamp: true });
             res.cookie("token", token);
             res.render("feed",{user:user,posts:allPosts}); 
         } else {
@@ -89,14 +98,14 @@ app.get("/feed",(req,res)=>{
 })
 
 app.get("/profile",async (req,res)=>{
-    let data = jwt.verify(req.cookies.token,"secret");
+    let data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
     let user = await userModel.findOne({email:data.email}).populate("posts");
     res.render("profile",{user:user});
 });
 
 app.get("/profile/:id",async(req,res)=>{
     // here i have to render the view page of the blog
-    let data = jwt.verify(req.cookies.token,"secret");
+    let data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
     let user = await userModel.findOne({email:data.email});
     let postId = req.params.id;
     let post = await postModel.findById(postId);
@@ -118,7 +127,7 @@ res.render("create");
 });
 
 app.post("/post/create/display",async (req,res)=>{
-    let data = jwt.verify(req.cookies.token,"secret");
+    let data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
     let user = await userModel.findOne({email:data.email});
     let post = await postModel.create({
         postData:`${req.body.postData}`,
@@ -132,7 +141,7 @@ app.post("/post/create/display",async (req,res)=>{
 });
 
 app.get("/blog/:id",async (req,res)=>{
-    let data = jwt.verify(req.cookies.token,"secret");
+    let data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
     let user = await userModel.findOne({email:data.email});
     let postId = req.params.id;
     let post = await postModel.findById(postId);
@@ -149,7 +158,7 @@ app.get("/blog/:id",async (req,res)=>{
 app.post("/post/display/:id",async (req,res)=>{
     // this is the route where we will display the edited maal , 
     // so that for each edit we dont end up making a new id.
-    let data = jwt.verify(req.cookies.token,"secret");
+    let data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
     let user = await userModel.findOne({email:data.email});
     let post = await postModel.findById(req.params.id);
 
@@ -173,7 +182,7 @@ app.get("/post/edit/:id",async (req,res)=>{
 // and we have an option of updation of the content.
 // Third:link an update button that again redirects to the display page so that
 // i can read the content again.
-let data = jwt.verify(req.cookies.token,"secret");
+let data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
 let user = await userModel.findOne({email:data.email});
 let postId = req.params.id;
 let post = await postModel.findById(postId);
@@ -196,7 +205,7 @@ else
 // content and additinally he can also edit the content published by himself.
 
 async function renderFeed(req,res){
-    const data = jwt.verify(req.cookies.token,"secret");
+    const data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
     const user = await userModel.findOne({email:data.email});
     const allPosts = await postModel.find().populate("user");
     res.render("feed",{user:user,posts:allPosts});
@@ -214,12 +223,16 @@ res.render("blogger",{post:completeData});
 
 });
 
-app.listen(3000,(err)=>{
-    if(err)
-    {
-        `There is some error:${err}`;
-    }
-    else{
-        console.log("Running");
-    }
+// app.listen(3000,(err)=>{
+//     if(err)
+//     {
+//         `There is some error:${err}`;
+//     }
+//     else{
+//         console.log("Running");
+//     }
+// });
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+module.exports = app;
