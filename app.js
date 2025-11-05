@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const mongoose = require("mongoose");
 const path = require("path");
 const userModel = require("./UserModel/user");
 const postModel = require("./UserModel/post");
@@ -8,6 +9,14 @@ const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT || 3000;
+const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/blogger';
+
+mongoose.connect(uri)
+  .then(() => console.log('✅ MongoDB Connected Successfully!'))
+  .catch(err => {
+    console.error('❌ MongoDB Connection Failed:', err.message);
+    process.exit(1);
+  });
 
 app.set("view engine","ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -40,7 +49,7 @@ app.post("/create", async (req, res) => {
     });
 
     // Generate JWT
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET);
+    const token = jwt.sign({ email: user.email },process.env.JWT_SECRET);
 
     // Set cookie
     res.cookie("token", token);
@@ -216,23 +225,12 @@ async function renderFeed(req,res){
 // info stored under it using the populate keyword and thus now id is not 
 // only numbers , but also hold the crucial data under it .
 app.get("/read/:id",async (req,res)=>{
-
 const postId = req.params.id;
 const completeData = await postModel.findById(postId).populate("user");
 res.render("blogger",{post:completeData});
-
+});
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
-// app.listen(3000,(err)=>{
-//     if(err)
-//     {
-//         `There is some error:${err}`;
-//     }
-//     else{
-//         console.log("Running");
-//     }
-// });
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-module.exports = app;
+

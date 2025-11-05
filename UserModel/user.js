@@ -1,6 +1,7 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
-mongoose.connect(process.env.MONGO_URI);
+const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/blogger';
+
 
 const userSchema = mongoose.Schema({
     name:String,
