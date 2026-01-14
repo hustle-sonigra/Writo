@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+/>
+
   <title>Blog</title>
   <style>
     body {
@@ -62,6 +67,49 @@
       opacity: 0.9;
       transform: scale(1.05);
     }
+    .like-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.like-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(6px);
+}
+
+.like-btn i {
+  font-size: 20px;
+  color: #fff;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.like-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}
+
+.like-btn:active i {
+  transform: scale(1.3);
+}
+
+.like-count {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+}
+
   </style>
 </head>
 <body>
@@ -69,7 +117,21 @@
     <h1><%= post.postTittle %></h1>
     <div class="content"><%= post.postData %></div>
     <p>- by <%= post.user.name %></p>
-    <a class="Edit" href="/post/edit/<%= post._id %>">Edit</a>
-  </div>
+    <div class="like-section" data-liked="<%= likedByUser %>">
+    <button class="like-btn" type="button">
+    <% if (likedByUser) { %>
+    <i class="fa-solid fa-heart"></i>
+    <% } else { %>
+    <i class="fa-regular fa-heart"></i>
+    <% } %>
+    </button>
+    <span class="like-count"> <%=post.likes.length%> </span>
+    </div>
+     <a class="Edit" href="/post/edit/<%= post._id %>">Edit</a>
+ </div>
+ <script src="/javascripts/like.js"></script>
 </body>
 </html>
+
+<%# this one comes from complete read %>
+
