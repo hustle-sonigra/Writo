@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <% if (filteredPosts && filteredPosts.length > 0) { %>
+    <% filteredPosts.forEach(post => { %>
+        <div class="post">
+            <h3><%= post.postTittle%></h3>
+            <p><%= post.postData %></p>
+        </div>
+    <% }) %>
+
+<% } else { %>
+
+    <p>No blogs available.</p>
+
+<% } %>
+
+</body>
+</html>
+
+<%# this page pops up when the search bar is presses ,matlab here is the place where i want to show and set up all the posts that are sort of related to keyword put in the search bar. %>
+
+
+

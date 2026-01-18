@@ -13,5 +13,7 @@ router.post("/post/display/:id",postController.displayEdittedBlog);
 router.get("/read/:id",postController.completeRead);
 router.post("/create/post", postController.writeBlog);
 router.get("/profile/:id",postController.writeContent);
+router.post("/post/:id/like",postController.toggleLike);
+router.post("/feed/filtered",postController.searchOutput);
 
 module.exports = router;

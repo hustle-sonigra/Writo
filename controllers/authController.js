@@ -62,6 +62,10 @@ exports.renderLogin = async (req,res) =>
 exports.renderLoginPage  = async (req,res) => {
     let user = await userModel.findOne({ email: req.body.email });
     let allPosts = await postModel.find().populate("user");
+    // ok so this line here has the working saying ke bhai we are using .find()
+    // and if we do not add any parameter to this then we end up with allposts
+    // then later using .populate(user) this changes the object ID in the arrays and adds in the usr details 
+    // thus through this we can now access the  post.user.userName
     if (!user) return res.render("wrong");
     bcrypt.compare(req.body.password, user.password, function(err, result) {
         if (result) {

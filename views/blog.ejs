@@ -117,31 +117,79 @@
   font-weight: bold;
   color: #fff;
 }
+.like-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.displayList {
+  position: absolute;
+  top: 120%;
+  left: 0;
+  min-width: 160px;
+
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 8px 10px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  display: none;
+  z-index: 100;
+}
+
+.like-wrapper:hover .displayList {
+  display: block;
+}
+
+.displayList div {
+  padding: 6px 4px;
+  font-size: 14px;
+  color: black;
+}
+
+.displayList div:hover {
+  background: #f5f5f5;
+  border-radius: 4px;
+  color: black;
+}
+
 
   </style>
 </head>
 <body>
+<form action="/post/<%= post._id %>/like" method="post">
 <div class="blog-container">
     <h1><%= post.postTittle %></h1>
     <div class="content"><%= post.postData %></div>
-    <p>- by <%= user.name %></p>
+    <p>- by <%= post.user.name  %></p>
+    <div class="like-wrapper">
   <div class="like-section" data-liked="<%= likedByUser %>">
-    <button class="like-btn" type="button">
+    <button class="like-btn" type="submit">
   <% if (likedByUser) { %>
     <i class="fa-solid fa-heart"></i>
   <% } else { %>
     <i class="fa-regular fa-heart"></i>
   <% } %>
 </button>
-<span class="like-count"> <%=post.likes.length%> </span>
+<span class="like-count"> <%=likeCount%> </span>
+</div>
+
+  <div class="displayList">
+    <% likedByList.forEach( u=>{ %>
+      <div> <%=u.name%></div>
+      <% }) %>
   </div>
+  </div>
+
     <a class="Edit" href="/post/edit/<%= post._id %>">Edit</a>
     <a class="profile" href="/profile">Profile</a>
 </div>
+</form>
 <script src="/javascripts/like.js"></script>
 </body>
 </html>
 
 <%# this one comes fron writeContent %> 
 <%# idhar biich mai only do hi routes hai that we know that sort of sort the issue of ours the full page read jaha pe we have the like ka  icon %>
-
+<%#  here i am using post.likes.length each time ! thus span mai agar text aaya then it will definately be the no of likes , but after reloads it pops zero each time matlab that the like is not saved in the db ka array. check the flow with the post and then try and relpicate so that we get the correct number of likes on the post also%>

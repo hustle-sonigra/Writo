@@ -29,6 +29,15 @@
     
     <a class="profile" href="/profile">Profile</a>
 
+    <div class="searchBar">
+        <form action="/feed/filtered" method="post">
+            <div class="bar">
+                <input type="text" placeholder="search" name="keyword">
+                <button type="submit" value="search" ></button>
+            </div>
+        </form>
+    </div>
+
     <% if( posts && posts.length >0 ) { %>
         <% posts.forEach(post =>{ %>
         <div class="post">
@@ -51,6 +60,8 @@
                 no posts yet!
             </p>
         <% } %>
-
 </body>
 </html>
+<%# recieving data from the browser , server %> 
+<%# sending data over to the server to be ultimately saved in the database , that is when we will have to use up a post request %>
+<%# this is the difference between a post and a get request %>
