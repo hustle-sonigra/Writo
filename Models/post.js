@@ -23,7 +23,10 @@ const postSchema = mongoose.Schema({
     default:Date.now
    }
 });
-
+postSchema.index({
+    postTittle: "text",
+    postData: "text"
+});
 module.exports=mongoose.model("post",postSchema);  
 // like naam ka ek array bana dia hai idhar humne 
 // this array is unique and special 

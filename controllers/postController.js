@@ -174,33 +174,43 @@ exports.toggleLike = async(req,res)=>{
 }
 
 exports.searchOutput = async (req, res) => {
-    const allPosts = await postsCache.getAllPostsWithAuthor();
     const keyword = req.body.keyword;
-    const filteredPosts = filterPosts(allPosts, keyword);
-    // res.render("searchFeed", {
-    //     filteredPosts,
-    //     keyword
-    // });
+    // indexed $text search approach , commented out in favour of string matching
+    // const posts = await postModel
+    //         .find(
+    //             {
+    //                 $text: {
+    //                     $search: keyword
+    //                 }
+    //             },
+    //             {
+    //                 postTittle: 1,
+    //                 postData: 1,
+    //                 user: 1,
+    //                 date: 1
+    //             }
+    //         ).limit(20).populate("user", "name");
+    const regex = new RegExp(keyword, "i");
+    const posts = await postModel
+            .find(
+                {
+                    $or: [
+                        { postTittle: regex },
+                        { postData: regex }
+                    ]
+                },
+                {
+                    postTittle: 1,
+                    postData: 1,
+                    user: 1,
+                    date: 1
+                }
+            ).limit(20).populate("user", "name");
     return res.status(200).json({
-        success:true,
-        data:{posts:filteredPosts}
+        success: true,
+        data: { posts }
     });
 };
-
-function filterPosts(posts, keyword) {
-    const searchWord = keyword.toLowerCase();
-    return posts.filter(post => {
-        const titleMatch = post.postTittle
-            .toLowerCase()
-            .includes(searchWord);
-
-        const contentMatch = post.postData
-            .toLowerCase()
-            .includes(searchWord);
-        return titleMatch || contentMatch;
-    });
-}
-
 // filter is powerful usecase 
 // here we loop through the entire posts 
 // match the word that we want in the given post or the tittle 
