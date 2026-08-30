@@ -6,10 +6,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userModel = require("../Models/user");
 const postModel = require("../Models/post");
+const postsCache = require("../cache/postsCache");
 // verify mai we are checking if the two tokens are the same or not 
 exports.getAllPosts = async (req, res) => {
     await req.user.populate("posts");
-    res.render("profile", { user: req.user });
+    // res.render("profile", { user: req.user });
+    return res.status(200).json({user:req.user});
 };
 // idhar user ke andar we have all the posts made by this particular user 
 // that is the key here 
@@ -45,7 +47,6 @@ exports.createPosts = async (req,res) =>{
     // this redirects to the new feed page , which also displays your newly added blog to it
     // let data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
     // let user = await userModel.findOne({email:data.email});
-    console.log(req.__AUTH_MIDDLEWARE_RAN__);
     let user = req.user;
     let post = await postModel.create({
         postData:`${req.body.postData}`,
@@ -54,6 +55,7 @@ exports.createPosts = async (req,res) =>{
     });
     user.posts.push(post._id);
     await user.save();
+    postsCache.invalidate();
     //res.render("feed",{user:user,post:post})
     return renderFeed(req,res);
 };
@@ -73,14 +75,30 @@ res.render("create");
 exports.displayEdittedBlog = async (req,res) => {
     // this is the route where we will display the edited maal , 
     // so that for each edit we dont end up making a new id.
+    
+    // check if the user has this post authored ?
     let user = req.user;
+    let postId = req.params.id;
     let post = await postModel.findById(req.params.id).populate("user","name").populate("likes","name");
+    if(!post)
+    {
+        // if the post is empty
+        return res.status(404).send("Post not found");
+    }
+    if(post.user.toString()!==user._id.toString())
+    {
+        // you are not authorized to be implementing such changes to the post.
+        return res.status(403).send("Forbidden");
+    }
     const likedByList = post.likes;
     const likedByUser = post.likes.some(
   u => u._id.toString() === user._id.toString()
 );
+// what needs to be done is to check the incoming token request se get the user 
+// and then from the postId get the user , 
+// then we compare the both to proceed with this furthur , that is the important detail here , in the underlying
+// concept.
 const likeCount = post.likes.length;
-
     let updatedPost = await postModel.findByIdAndUpdate(
       req.params.id,
       {
@@ -89,6 +107,7 @@ const likeCount = post.likes.length;
       },
       { new: true }
     );
+postsCache.invalidate();
 res.render("blog",{user,post:updatedPost,likedByList,likedByUser,likeCount});
 };
 
@@ -122,15 +141,18 @@ const likedByUser = post.likes.some(
   u => u._id.toString() === user._id.toString()
 );
 const likeCount = post.likes.length;
-console.log("LIKED BY LIST:", post.likes);
 res.render("blogger",{user,post,likedByUser,likeCount,likedByList});
 };
 
 async function renderFeed(req,res){
     const data = jwt.verify(req.cookies.token,process.env.JWT_SECRET);
     const user = await userModel.findOne({email:data.email});
-    const allPosts = await postModel.find().populate("user");
-    res.render("feed",{user:user,posts:allPosts});
+    const allPosts = await postsCache.getAllPostsWithAuthor();
+    // res.render("feed",{user:user,posts:allPosts});
+    return res.status(200).json({
+        success:true,
+        data:{user,posts:allPosts}
+    });
 }
 
 exports.toggleLike = async(req,res)=>{
@@ -152,19 +174,20 @@ exports.toggleLike = async(req,res)=>{
 }
 
 exports.searchOutput = async (req, res) => {
-    const allPosts = await postModel.find().populate("user", "name");
+    const allPosts = await postsCache.getAllPostsWithAuthor();
     const keyword = req.body.keyword;
     const filteredPosts = filterPosts(allPosts, keyword);
-    res.render("searchFeed", {
-        filteredPosts,
-        keyword
+    // res.render("searchFeed", {
+    //     filteredPosts,
+    //     keyword
+    // });
+    return res.status(200).json({
+        success:true,
+        data:{posts:filteredPosts}
     });
 };
 
 function filterPosts(posts, keyword) {
-    // if (!keyword || keyword.trim() === "") {
-    //     return [];
-    // }
     const searchWord = keyword.toLowerCase();
     return posts.filter(post => {
         const titleMatch = post.postTittle
@@ -174,7 +197,6 @@ function filterPosts(posts, keyword) {
         const contentMatch = post.postData
             .toLowerCase()
             .includes(searchWord);
-
         return titleMatch || contentMatch;
     });
 }

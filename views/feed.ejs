@@ -7,9 +7,7 @@
     <link rel="stylesheet" href="/stylesheets/styleFeed.css">
 </head>
 <body>
-    <h1>
-        Welcome to the FEED.
-    </h1>
+   
     <%# 
     This sould be the first page that opens up once we are logged 
     in this page will have the card structure where we can 
@@ -26,40 +24,25 @@
     individual page open hoga and if we match the author 
     is seeing toh hi edit button display hoga.
     %>
-    
+
+     <h1>
+        Welcome to the FEED.
+    </h1>
+
     <a class="profile" href="/profile">Profile</a>
 
     <div class="searchBar">
-        <form action="/feed/filtered" method="post">
+        <form id="searchBar">
             <div class="bar">
-                <input type="text" placeholder="search" name="keyword">
+                <input type="text" placeholder="search" name="keyword" id="keyword">
                 <button type="submit" value="search" ></button>
             </div>
         </form>
     </div>
 
-    <% if( posts && posts.length >0 ) { %>
-        <% posts.forEach(post =>{ %>
-        <div class="post">
-            <div class="tittle">
-                <p>
-                    <%= post.postTittle %>
-                </p>
-            </div>
-            <div class="text">
-                <p>
-                    <%= post.postData.substring(0, 100)  %>
-                </p>
-            </div>
-             <p class="author">By: <%= post.user.name%></p>
-            <a class="extend" href="/read/<%= post._id%>">Read More</a>
-        </div>
-        <% }) %>
-        <% } else { %>
-            <p>
-                no posts yet!
-            </p>
-        <% } %>
+<div id="feed"></div>
+<script src="javascripts/feed/feedShow.js"></script>
+<script src="/javascripts/feed/feedSearchButton.js"></script>
 </body>
 </html>
 <%# recieving data from the browser , server %> 

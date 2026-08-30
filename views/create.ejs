@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog</title>
+     <link rel="stylesheet" href="/stylesheets/styleCreate.css">
 </head>
 <body>
     <h1>
         Start writing your blog.
     </h1>
-    <form action="/post/create/display" method="post">
+    <form id="submitBtn">
         <input type="text"  placeholder="tittle" name="postTittle">
         <textarea placeholder="content" name="postData"></textarea>
         <input type="submit" value="submit">
-    </form>
+    </form> 
+    <script src="/javascripts/create.js"></script>
 </body>
 </html>
 

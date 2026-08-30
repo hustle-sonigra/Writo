@@ -12,6 +12,7 @@ const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT || 3000;
 const authRoutes = require("./routes/authRoutes");
 const postRoutes = require("./routes/postRoutes");
+const pageRoutes = require("./routes/pageRoutes");
 
 // connect DB
 connectDB();
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname,"public")));
 
 app.use("/", authRoutes);
 app.use("/", postRoutes);
+app.use("/", pageRoutes);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);

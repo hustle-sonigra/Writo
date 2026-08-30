@@ -6,7 +6,7 @@ const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/blogger';
 const userSchema = mongoose.Schema({
     name:String,
     age:Number,
-    email:String,
+    email:{type:String, index:true},
     password:String,
     posts:[
             {

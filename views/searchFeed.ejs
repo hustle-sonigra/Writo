@@ -4,22 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="/stylesheets/styleFiltered.css">
 </head>
 <body>
-    <% if (filteredPosts && filteredPosts.length > 0) { %>
-    <% filteredPosts.forEach(post => { %>
-        <div class="post">
-            <h3><%= post.postTittle%></h3>
-            <p><%= post.postData %></p>
-        </div>
-    <% }) %>
-
-<% } else { %>
-
-    <p>No blogs available.</p>
-
-<% } %>
-
+    <h1>According to the keyword</h1>
+    <div id="filteredPosts"></div>
+    <script src="/javascripts/feed/feedSearch.js"></script>
 </body>
 </html>
 

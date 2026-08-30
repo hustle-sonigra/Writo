@@ -26,7 +26,7 @@ h1 {
        
 }
 
-.form{
+#loginForm{
     margin-top: 22px;
     display:flex;
     flex-direction: column;
@@ -38,7 +38,7 @@ h1 {
   width: 260px;  
 }
 
-form input {
+#loginForm input {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -47,12 +47,12 @@ form input {
   transition: border 0.2s;
 }
 
-.form input:focus {
+#loginForm input:focus {
   border-color: #a1bcdb;        
 }
 
 /* Button */
-.form button {
+#loginForm button {
   padding: 10px;
   border: none;
   border-radius: 8px;
@@ -63,6 +63,6 @@ form input {
   transition: background 0.3s;
 }
 
-.form button:hover {
+#loginForm button:hover {
   background: #3c3f43;
 }
