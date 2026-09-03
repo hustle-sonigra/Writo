@@ -10,3 +10,6 @@ node_modules
 
 # Optional: build cache or Vercel metadata
 .vercel
+
+# Bench: minted JWTs for local load tests — live credentials, never commit
+bench/tokens.json
