@@ -36,7 +36,7 @@ This project was built to understand:
 * Create, edit, and delete blog posts
 * Liking system with real-time count and updations
 * Search blogs by keyword
-* Filtered result on base of String Matching
+* Filtered result via regex, in-memory, or MongoDB text-index search, selectable with `SEARCH_MODE`
 * Role-based access (only authors can edit their posts) , proper Authorisation
 * Responsive and minimal UI 
 
@@ -92,7 +92,12 @@ Create a `.env` file and add:
 ```
 MONGO_URI=your_mongodb_url
 JWT_SECRET=your_secret_key
+SEARCH_MODE=regex   # optional — regex (default) | text | memory
 ```
+
+`SEARCH_MODE` picks the strategy behind blog search: `regex` runs a case-insensitive
+`$or` match, `text` uses the MongoDB text index declared on `Post`, and `memory`
+fetches every post and filters in JS (slow — kept for benchmarking comparisons).
 
 ---
 ## Architecture
@@ -109,7 +114,7 @@ JWT_SECRET=your_secret_key
 
 * Comment system to make it feel completed
 * Pagination for feed(responsive user redirection , enhanced navigation)
-* Full-text MongoDB search(better latency and searching outputs)
+* Make text-index search (`SEARCH_MODE=text`) the default once benchmarked further
 * User profile analytics
 * Custom feed placement for each user
 * Better UI for seamless usage
