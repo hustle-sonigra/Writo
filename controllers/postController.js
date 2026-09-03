@@ -156,21 +156,18 @@ async function renderFeed(req,res){
 }
 
 exports.toggleLike = async(req,res)=>{
-    // here i have to save all the likes made to the DB 
-     const post = await postModel.findById(req.params.id);
-     const userId = req.user._id;
-    const alreadyLiked = post.likes.some( id => id.toString() === userId.toString() );
-    // already liked now holds the data whether the current user before pressing the like button has he liked this current before or not
-    // if true that means now we are unliking it back
-    if (alreadyLiked) {
-    post.likes = post.likes.filter(
-      id => id.toString() !== userId.toString()
+    // here i have to save all the likes made to the DB
+    const id = req.params.id;
+    const userId = req.user._id;
+
+    const alreadyLiked = await postModel.exists({ _id: id, likes: userId });
+
+    await postModel.updateOne(
+      { _id: id },
+      alreadyLiked ? { $pull: { likes: userId } } : { $addToSet: { likes: userId } }
     );
-  } else {
-    post.likes.push(userId);
-  }
-  await post.save(); // saving the new changes back in the postModel
-  res.redirect(`/read/${post._id}`);
+
+    res.redirect(`/read/${id}`);
 }
 
 // escapes regex metacharacters so a keyword can't break out of the pattern
