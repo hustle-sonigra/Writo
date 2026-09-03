@@ -1,0 +1,10 @@
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27117:27017"
+    volumes:
+      - bench-mongo-data:/data/db
+
+volumes:
+  bench-mongo-data:
