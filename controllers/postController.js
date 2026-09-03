@@ -85,7 +85,7 @@ exports.displayEdittedBlog = async (req,res) => {
         // if the post is empty
         return res.status(404).send("Post not found");
     }
-    if(post.user.toString()!==user._id.toString())
+    if(post.user._id.toString()!==user._id.toString())
     {
         // you are not authorized to be implementing such changes to the post.
         return res.status(403).send("Forbidden");
