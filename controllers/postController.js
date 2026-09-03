@@ -173,25 +173,50 @@ exports.toggleLike = async(req,res)=>{
   res.redirect(`/read/${post._id}`);
 }
 
+// escapes regex metacharacters so a keyword can't break out of the pattern
+// (searchOutput used to build a RegExp straight from req.body with no escaping)
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// SEARCH_MODE picks which of the three query shapes searchOutput runs, so the
+// bench harness can flip modes without a code edit. Defaults to "regex" to
+// match production's current committed behaviour.
 exports.searchOutput = async (req, res) => {
     const keyword = req.body.keyword;
-    // indexed $text search approach , commented out in favour of string matching
-    // const posts = await postModel
-    //         .find(
-    //             {
-    //                 $text: {
-    //                     $search: keyword
-    //                 }
-    //             },
-    //             {
-    //                 postTittle: 1,
-    //                 postData: 1,
-    //                 user: 1,
-    //                 date: 1
-    //             }
-    //         ).limit(20).populate("user", "name");
-    const regex = new RegExp(keyword, "i");
-    const posts = await postModel
+    const mode = process.env.SEARCH_MODE || "regex";
+    let posts;
+
+    if (mode === "memory") {
+        // no filter at the DB level — fetch everything, filter in JS.
+        // kept slow on purpose: no projection, no .lean(), populate stays,
+        // and the whole collection has to be scanned before filtering starts.
+        const allPosts = await postModel.find().populate("user", "name");
+        const lower = keyword.toLowerCase();
+        posts = allPosts
+            .filter(p =>
+                p.postTittle?.toLowerCase().includes(lower) ||
+                p.postData?.toLowerCase().includes(lower)
+            )
+            .slice(0, 20);
+    } else if (mode === "text") {
+        posts = await postModel
+            .find(
+                {
+                    $text: {
+                        $search: keyword
+                    }
+                },
+                {
+                    postTittle: 1,
+                    postData: 1,
+                    user: 1,
+                    date: 1
+                }
+            ).limit(20).lean();
+    } else {
+        const regex = new RegExp(escapeRegex(keyword), "i");
+        posts = await postModel
             .find(
                 {
                     $or: [
@@ -205,7 +230,9 @@ exports.searchOutput = async (req, res) => {
                     user: 1,
                     date: 1
                 }
-            ).limit(20).populate("user", "name");
+            ).limit(20).lean();
+    }
+
     return res.status(200).json({
         success: true,
         data: { posts }
