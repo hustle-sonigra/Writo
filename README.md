@@ -77,6 +77,57 @@ Individual full-screen read of the blog , with the list of liked users being dis
 Search bar in place
 <img width="1895" height="942" alt="Screenshot 2026-01-18 215103" src="https://github.com/user-attachments/assets/739b3425-737d-4fc6-81a5-ba881a7b704a" />
 ---
+---
+
+## 🧪 Testing Search Bar
+
+Curious about the scalability of the search bar, I tested different search strategies under load using **k6**.
+
+The goal was to compare how different approaches perform as the number of posts increases.
+
+### Search Strategies
+
+* **Memory:** Fetch all posts and filter them in JavaScript
+* **Regex:** Perform a case-insensitive MongoDB `$or` query
+* **Text:** Use a MongoDB text index
+* **Atlas:** Use MongoDB Atlas Search
+
+### 📊 k6 Benchmark Results
+
+| Mode | Query Type | Median (ms) | p95 (ms) | Target |
+|---|---|---:|---:|:---:|
+| memory | common | 2,898 | 4,749 | ❌ Fail |
+| memory | rare | 2,878 | 4,831 | ❌ Fail |
+| memory | miss | 10,084 | 19,046 | ❌ Fail |
+| regex | common | 18.9 | 26.7 | ✅ Pass |
+| regex | rare | 17.4 | 33.0 | ✅ Pass |
+| regex | miss | 24.7 | 151.4 | ✅ Pass |
+| text | common | 21.6 | 39.5 | ✅ Pass |
+| text | rare | 19.3 | 39.6 | ✅ Pass |
+| text | miss | 27.5 | 44.5 | ✅ Pass |
+| atlas | common | 16.0 | 40.1 | ✅ Pass |
+| atlas | rare | 13.8 | 33.3 | ✅ Pass |
+| atlas | miss | 31.0 | 53.5 | ✅ Pass |
+
+### 🔎 Observations
+
+At the current stage of Writo, when the number of posts is **≤ 20,000**, regex-based search performs well without requiring additional search indexes.
+
+As the dataset grows, database-indexed approaches become more attractive. In my local testing, **MongoDB Text Search and Atlas Search produced comparable performance** for the tested workloads.
+
+The in-memory approach performed significantly worse because it retrieves the entire dataset and performs filtering inside the Node.js application.
+
+### 🧠 Key Takeaway
+
+The benchmark helped demonstrate an important scalability difference:
+
+> **In-memory filtering increases application-side work as the dataset grows, while database-side search allows MongoDB to perform the filtering closer to the data.**
+
+For the current scale of Writo, regex provides a good balance between **simplicity and performance**.
+
+However, as the dataset grows further, indexed search becomes a more suitable option.
+
+The search strategy can be changed without modifying the application flow using:
 
 ## ⚙️ Run Locally
 
