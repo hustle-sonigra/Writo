@@ -176,12 +176,15 @@ function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// SEARCH_MODE picks which of the three query shapes searchOutput runs, so the
+// SEARCH_MODE picks which of the four query shapes searchOutput runs, so the
 // bench harness can flip modes without a code edit. Defaults to "regex" to
-// match production's current committed behaviour.
+// match production's current committed behaviour. Also echoed back as the
+// X-Search-Mode response header so a load-test harness can confirm which
+// mode a running server is actually in before trusting a run against it.
 exports.searchOutput = async (req, res) => {
     const keyword = req.body.keyword;
     const mode = process.env.SEARCH_MODE || "regex";
+    res.set("X-Search-Mode", mode);
     let posts;
 
     if (mode === "memory") {
@@ -211,6 +214,32 @@ exports.searchOutput = async (req, res) => {
                     date: 1
                 }
             ).limit(20).lean();
+    } else if (mode === "atlas") {
+        // Atlas Search's "text" operator - the fair comparison against $text,
+        // not a fuzzy/autocomplete operator. Requires a search index named
+        // "default" on postTittle/postData (bench/build-search-index.js) and
+        // only runs against a deployment that supports $search (mongot) -
+        // the plain mongo:7 bench container does not.
+        posts = await postModel.aggregate([
+            {
+                $search: {
+                    index: "default",
+                    text: {
+                        query: keyword,
+                        path: ["postTittle", "postData"]
+                    }
+                }
+            },
+            { $limit: 20 },
+            {
+                $project: {
+                    postTittle: 1,
+                    postData: 1,
+                    user: 1,
+                    date: 1
+                }
+            }
+        ]);
     } else {
         const regex = new RegExp(escapeRegex(keyword), "i");
         posts = await postModel

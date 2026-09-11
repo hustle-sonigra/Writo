@@ -73,9 +73,22 @@ const KEYWORDS = [
   { keyword: "gerrymandering", trend: missTrend, label: "miss" },
 ];
 
-export default function (data) {
-  const { keyword, trend, label } = KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
+// One keyword per run, from -e KW=..., not a random cycle — each results
+// file (results\<size>-<mode>-<kw>-<run>.json) then holds one clean band
+// instead of three interleaved ones. -e MODE=... is NOT what selects the
+// server's search mode (that's the SEARCH_MODE env var on the app process,
+// set before it's (re)started) - it's only used here to tag output and to
+// assert the running server is actually in the mode this run thinks it's
+// testing, via the X-Search-Mode response header.
+const KW = __ENV.KW;
+const MODE = __ENV.MODE || null;
+const active = KEYWORDS.find((k) => k.keyword === KW);
+if (!active) {
+  throw new Error(`-e KW=... must be one of: ${KEYWORDS.map((k) => k.keyword).join(", ")}`);
+}
+const { keyword, trend, label } = active;
 
+export default function (data) {
   const res = http.post(
     `${BASE_URL}/api/v1/post/filtered`,
     JSON.stringify({ keyword }),
@@ -97,6 +110,11 @@ export default function (data) {
         return false;
       }
     },
+    // catches mode drift mid-run (e.g. the wrong server left running from a
+    // previous stage) instead of silently attributing another mode's cost
+    // to this one
+    "server is in the expected SEARCH_MODE": (r) =>
+      !MODE || r.headers["X-Search-Mode"] === MODE,
   });
 
   // only the measured scenario's samples count toward the reported trends

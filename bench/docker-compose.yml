@@ -1,10 +1,27 @@
+# mongodb-atlas-local (not plain mongo:7) — bundles mongot, so it's the only
+# local image that can build and serve an Atlas Search ($search) index. This
+# is a different Mongo build/version than the old mongo:7 container, so any
+# numbers captured against that container (bench/baseline.json, bench/after.json)
+# are not comparable to runs against this one — regex/text need re-running
+# here too for a fair four-way comparison, not just the new atlas mode.
+#
+# Connect with MONGO_URI="mongodb://localhost:27117/blogger_bench?directConnection=true"
+# — this image runs as a single-node replica set, and the driver needs
+# directConnection=true to talk to it directly instead of trying (and failing)
+# to discover the rest of a replica set that doesn't exist.
+#
+# cpus/mem_limit cap this container's share of the host: k6, Node and Mongo
+# all share one Windows machine here, so an uncapped Mongo competing with the
+# app process for CPU would leak into every mode's numbers, not just atlas's.
 services:
   mongo:
-    image: mongo:7
+    image: mongodb/mongodb-atlas-local:latest
     ports:
       - "27117:27017"
     volumes:
       - bench-mongo-data:/data/db
+    cpus: "2"
+    mem_limit: "2g"
 
 volumes:
   bench-mongo-data:

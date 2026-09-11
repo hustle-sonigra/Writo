@@ -1,0 +1,152 @@
+{
+    "metrics": {
+        "vus": {
+            "value": 10,
+            "min": 10,
+            "max": 10
+        },
+        "search_common_javascript": {
+            "p(95)": 124.40876499999987,
+            "avg": 50.7135901639344,
+            "min": 7.3821,
+            "med": 32.95465,
+            "max": 777.6132,
+            "p(90)": 94.28898000000007
+        },
+        "http_req_tls_handshaking": {
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_duration": {
+            "avg": 44.925585572322376,
+            "min": 6.3051,
+            "med": 29.2822,
+            "max": 777.6132,
+            "p(90)": 86.89798000000002,
+            "p(95)": 114.38901999999997
+        },
+        "iteration_duration": {
+            "p(95)": 221.39373999999998,
+            "avg": 147.90295027603938,
+            "min": 107.42,
+            "med": 131.7348,
+            "max": 878.169,
+            "p(90)": 193.08604000000003
+        },
+        "iterations": {
+            "count": 2717,
+            "rate": 67.72354227088024
+        },
+        "http_req_connecting": {
+            "max": 2.9188,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.01268465218991535,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_blocked": {
+            "avg": 0.06409444239970559,
+            "min": 0,
+            "med": 0,
+            "max": 14.6635,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 44.925585572322376,
+            "min": 6.3051,
+            "med": 29.2822,
+            "max": 777.6132,
+            "p(90)": 86.89798000000002,
+            "p(95)": 114.38901999999997
+        },
+        "http_req_sending": {
+            "p(90)": 0,
+            "p(95)": 0.34071999999999764,
+            "avg": 0.0734418108207582,
+            "min": 0,
+            "med": 0,
+            "max": 49.8367
+        },
+        "http_req_receiving": {
+            "p(95)": 1.0453799999999998,
+            "avg": 0.42505723224144276,
+            "min": 0,
+            "med": 0,
+            "max": 55.1924,
+            "p(90)": 0.99016
+        },
+        "data_sent": {
+            "count": 847704,
+            "rate": 21129.745188514637
+        },
+        "http_reqs": {
+            "rate": 67.72354227088024,
+            "count": 2717
+        },
+        "checks": {
+            "passes": 8151,
+            "fails": 0,
+            "value": 1
+        },
+        "vus_max": {
+            "value": 20,
+            "min": 20,
+            "max": 20
+        },
+        "data_received": {
+            "rate": 560005.9710379088,
+            "count": 22466873
+        },
+        "http_req_waiting": {
+            "min": 5.5498,
+            "med": 29.042,
+            "max": 769.1668,
+            "p(90)": 85.95600000000002,
+            "p(95)": 114.18971999999997,
+            "avg": 44.42708652926009
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 2717,
+            "value": 0
+        }
+    },
+    "setup_data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJlbmNoLXVzZXItMUBleGFtcGxlLmNvbSJ9.H_N_XERDtk9S8QaPux1Gt8JWJlTHQKr-IWBcj9NN2P0"
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "status is 200": {
+                    "id": "6210a8cd14cd70477eba5c5e4cb3fb5f",
+                    "passes": 2717,
+                    "fails": 0,
+                    "name": "status is 200",
+                    "path": "::status is 200"
+                },
+                "body has success:true": {
+                    "name": "body has success:true",
+                    "path": "::body has success:true",
+                    "id": "6297cc3debfe6167bf85646fab9299b4",
+                    "passes": 2717,
+                    "fails": 0
+                },
+                "server is in the expected SEARCH_MODE": {
+                    "name": "server is in the expected SEARCH_MODE",
+                    "path": "::server is in the expected SEARCH_MODE",
+                    "id": "50931e4e67e7e926496b7bf71c22856c",
+                    "passes": 2717,
+                    "fails": 0
+                }
+            }
+    }
+}
